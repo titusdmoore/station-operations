@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import { Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { supabase, getRoster, getIssueTypes } from '../lib/supabase';
 
-export default function ProbationReport() {
-  const [ formData, setFormData ] = useState({
+export default function ProbationReport(props) {
+  const { session } = props.route.params;
+  const defaultFormData = {
     firstName: '',
     lastName: '',
     typeIssue: { label: 'Select Issue Type', value: '' }, 
     issueDescription: '',
     personInvolved: { label: 'Select Person Involved', value: '' },
-  });
+  };
+  const [ formData, setFormData ] = useState(defaultFormData);
   const [ typeIssueSelectIsOpened, setTypeIssueSelectIsOpened ] = useState(false);
   const [ personInvolvedSelectIsOpened, setPersonInvolvedSelectIsOpened ] = useState(false);
   const [ roster, setRoster ] = useState([]);
@@ -31,7 +33,7 @@ export default function ProbationReport() {
     })
   }
 
-  const submitReport = async () => {
+  const submitReport = async (sendEmail = true) => {
     const { data, error } = await supabase
       .from('reports')
       .insert([
@@ -42,12 +44,32 @@ export default function ProbationReport() {
           issueDescription: formData.issueDescription,
           personInvolved: formData.personInvolved.value,
         }
-      ]);
+      ]).select(`
+        firstName,
+        lastName,
+        typeIssue,
+        issueDescription,
+        roster (
+          name
+        )
+      `);
 
     if (error) {
+      console.log(error)
       return error;
     }
 
+    if (sendEmail) {
+      const res = await supabase.functions.invoke('send_report_email', {
+        body: {
+          ...data[0],
+          typeIssue: formData.typeIssue.label,
+          userEmail: session.user.email,
+        }
+      });
+    }
+
+    setFormData(defaultFormData);
     return data;
   }
 
@@ -55,13 +77,14 @@ export default function ProbationReport() {
     (async function() {
       let roster = await getRoster({ col: 'isProbationary', val: true });
       let issueTypes = await getIssueTypes();
+
       setRoster(roster);
       setIssueTypes(issueTypes);
     })();
   }, []);
 
   return (
-    <View className="px-2 bg-gray-700 h-full pt-4">
+    <ScrollView className="px-2 bg-gray-700 h-full pt-4">
       <View>
         <Text className="text-white text-xl mb-2">Name</Text>
         <View className="d-flex flex-row w-full">
@@ -130,15 +153,20 @@ export default function ProbationReport() {
             ...formData,
             issueDescription: value
           })
-        }} value={formData.issueDescription} className="border-[1px] border-white rounded-md p-2 h-40 text-white relative z-[-100]" /> 
+        }} value={formData.issueDescription} className="border-[1px] border-white rounded-md p-2 h-40 text-white relative z-[-100]" textAlignVertical='top' /> 
       </View>
-      <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 relative z-[-10]" onPress={submitReport}>
-        <Text className="text-white text-center">Submit</Text>
-      </TouchableOpacity>
-      <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 relative z-[-10]" onPress={() => { console.log(formData); }}>
+      <View className="flex flex-row">
+        <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1" onPress={submitReport}>
+          <Text className="text-white text-center">Submit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 relative z-[-10] flex-1 ml-1" onPress={() => { submitReport(false) }}>
+          <Text className="text-white text-center">Submit (No Email)</Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 mb-8 relative z-[-10]" onPress={() => { console.log(formData); }}>
         <Text className="text-white text-center">Log Form Data</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 

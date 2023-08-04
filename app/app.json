@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ftfd-probie-reporting",
-    "slug": "ftfd-probie-reporting",
+    "name": "ftfd-station-operations",
+    "slug": "ftfd-station-operations",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,10 +21,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#374151"
-      }
+      },
+      "package": "com.tmooredev.ftfdstationoperations"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ae07cb01-5b7f-4d5e-8fda-124ae174a2ec"
+      }
     }
   }
 }
