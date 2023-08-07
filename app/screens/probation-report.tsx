@@ -16,7 +16,8 @@ export default function ProbationReport(props) {
   const [ personInvolvedSelectIsOpened, setPersonInvolvedSelectIsOpened ] = useState(false);
   const [ roster, setRoster ] = useState([]);
   const [ issueTypes, setIssueTypes ] = useState([]);
-
+  const [ validInput, setValidInput ] = useState(false);
+ 
   const renderOptions = (options, property, selectVisibility) => {
     return options.map((option) => {
       return (
@@ -72,6 +73,24 @@ export default function ProbationReport(props) {
     setFormData(defaultFormData);
     return data;
   }
+
+  const evalValidInput = () => {
+    let empty = Object.keys(formData).filter(key => {
+      switch (key) {
+        case 'personInvolved':
+        case 'typeIssue':
+          return formData[key].value === '';
+        default:
+          return formData[key] === '';
+      }
+    });
+
+    return empty.length === 0;
+  }
+
+  useEffect(() => {
+    setValidInput(evalValidInput());
+  }, [formData])
 
   useEffect(() => {
     (async function() {
@@ -156,11 +175,11 @@ export default function ProbationReport(props) {
         }} value={formData.issueDescription} className="border-[1px] border-white rounded-md p-2 h-40 text-white relative z-[-100]" textAlignVertical='top' /> 
       </View>
       <View className="flex flex-row">
-        <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1" onPress={submitReport}>
-          <Text className="text-white text-center">Submit</Text>
+        <TouchableOpacity className={`p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1 ${validInput ? "bg-red-600" : "bg-red-800"}`} disabled={!validInput} onPress={submitReport}>
+          <Text className={`${validInput ? "text-white" : "text-gray-400"} text-center`}>Submit</Text>
         </TouchableOpacity>
-        <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 relative z-[-10] flex-1 ml-1" onPress={() => { submitReport(false) }}>
-          <Text className="text-white text-center">Submit (No Email)</Text>
+        <TouchableOpacity className={`p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1 ${validInput ? "bg-red-600" : "bg-red-800"}`} disabled={validInput} onPress={() => { submitReport(false) }}>
+          <Text className={`${validInput ? "text-white" : "text-gray-400"} text-center`}>Submit (No Email)</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 mb-8 relative z-[-10]" onPress={() => { console.log(formData); }}>
