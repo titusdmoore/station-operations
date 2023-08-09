@@ -2,6 +2,7 @@
   "expo": {
     "name": "Station Operations",
     "slug": "ftfd-station-operations",
+    "scheme": "stationOperations",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
