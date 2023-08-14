@@ -9,6 +9,7 @@ import { supabase } from './lib/supabase';
 import Home from './screens/home'; 
 import ProbationReport from './screens/probation-report'; 
 import LoginScreen from './screens/login'; 
+import RegisterScreen from './screens/register';
 
 const Stack = createStackNavigator();
 
