@@ -50,7 +50,6 @@ export default function AppStack() {
               <Stack.Screen name="Login" component={LoginScreen} options={{
                 headerLeft: () => null,
               }} />
-              <Stack.Screen name="Register" component={RegisterScreen} />
             </>
         )}
       </Stack.Navigator>
