@@ -2,7 +2,7 @@
   "expo": {
     "name": "Station Operations",
     "slug": "ftfd-station-operations",
-    "scheme": "stationOperations",
+    "scheme": "station-operations",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,6 +20,7 @@
       "bundleIdentifier": "com.tmooredev.ftfdstationoperations"
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#374151"

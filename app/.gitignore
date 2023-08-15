@@ -36,3 +36,7 @@ yarn-error.*
 .env
 .env._local
 .env.local
+
+# I don't want to track ios or android
+ios/
+android/
