@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import IndicatorPressable from '../components/IndicatorPressable';
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { supabase, getRoster, getIssueTypes } from '../lib/supabase';
 
 export default function ProbationReport(props) {
@@ -17,6 +18,7 @@ export default function ProbationReport(props) {
   const [ roster, setRoster ] = useState([]);
   const [ issueTypes, setIssueTypes ] = useState([]);
   const [ validInput, setValidInput ] = useState(false);
+  const [ isLoading, setIsLoading ] = useState(false);
  
   const renderOptions = (options, property, selectVisibility) => {
     return options.map((option) => {
@@ -35,6 +37,8 @@ export default function ProbationReport(props) {
   }
 
   const submitReport = async (sendEmail = true) => {
+    console.log("here")
+    setIsLoading(true);
     const { data, error } = await supabase
       .from('reports')
       .insert([
@@ -57,6 +61,7 @@ export default function ProbationReport(props) {
 
     if (error) {
       console.log(error)
+      setIsLoading(false);
       return error;
     }
 
@@ -70,7 +75,11 @@ export default function ProbationReport(props) {
       });
     }
 
+    // Clean up state
     setFormData(defaultFormData);
+    setValidInput(false);
+    setIsLoading(false);
+
     return data;
   }
 
@@ -103,7 +112,7 @@ export default function ProbationReport(props) {
   }, []);
 
   return (
-    <ScrollView className="px-2 bg-gray-700 h-full pt-4">
+    <ScrollView className="px-2 bg-gray-700 h-full pt-4 relative">
       <View>
         <Text className="text-white text-xl mb-2">Name</Text>
         <View className="d-flex flex-row w-full">
@@ -130,7 +139,7 @@ export default function ProbationReport(props) {
             </View>
             {
               typeIssueSelectIsOpened ? (
-                <ScrollView className="bg-white rounded-md p-2 mr-1 absolute top-full left-0 z-[150] w-full max-h-40">
+                <ScrollView className="bg-white rounded-md p-2 mr-1 absolute top-full left-0 z-[300] w-full max-h-40">
                   {renderOptions([
                     { label: 'Select Issue Type', value: '' },
                     ...issueTypes.map((issue) => {
@@ -175,16 +184,20 @@ export default function ProbationReport(props) {
         }} value={formData.issueDescription} className="border-[1px] border-white rounded-md p-2 h-40 text-white relative z-[-100]" textAlignVertical='top' /> 
       </View>
       <View className="flex flex-row">
-        <TouchableOpacity className={`p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1 ${validInput ? "bg-red-600" : "bg-red-800"}`} disabled={!validInput} onPress={submitReport}>
+        <IndicatorPressable className={`p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1 ${!validInput ? "bg-red-800" : "" }`} isLoading={isLoading} disabled={!validInput || isLoading} onPress={submitReport}>
           <Text className={`${validInput ? "text-white" : "text-gray-400"} text-center`}>Submit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className={`p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1 ${validInput ? "bg-red-600" : "bg-red-800"}`} disabled={validInput} onPress={() => { submitReport(false) }}>
+        </IndicatorPressable>
+        <IndicatorPressable className={`p-2 rounded-md mt-2 relative z-[-10] flex-1 mr-1 ${!validInput ? "bg-red-800" : "" }`} isLoading={isLoading} disabled={!validInput || isLoading} onPress={() => { submitReport(false) }}>
           <Text className={`${validInput ? "text-white" : "text-gray-400"} text-center`}>Submit (No Email)</Text>
-        </TouchableOpacity>
+        </IndicatorPressable>
       </View>
-      <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 mb-8 relative z-[-10]" onPress={() => { console.log(formData); }}>
+      <TouchableOpacity className="bg-red-600 p-2 rounded-md mt-2 mb-8 relative z-[-10]" onPress={() => { console.log(formData, validInput, isLoading, !validInput || isLoading); }}>
         <Text className="text-white text-center">Log Form Data</Text>
       </TouchableOpacity>
+       { true ? (<Pressable onPress={() => {
+        setTypeIssueSelectIsOpened(false);
+        setPersonInvolvedSelectIsOpened(false);
+      }} className="h-screen w-screen absolute -top-4 -left-2 z-[100]"></Pressable>) : null }
     </ScrollView>
   );
 }
